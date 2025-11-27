@@ -57,7 +57,7 @@ const Home = () => {
   const fetchGames = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/games");
+      const { data } = await api.get("/api/games");
       setGames(data.data);
       setFilteredGames(data.data);
       setError("");
