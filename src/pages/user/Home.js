@@ -6,7 +6,7 @@ import GameCard from "../../components/common/GameCard";
 import GameCardFlip from "../../components/common/GameCardFlip";
 import Loader from "../../components/common/Loader";
 import Message from "../../components/common/Message";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const Home = () => {
   const location = useLocation();
@@ -34,11 +34,10 @@ const Home = () => {
     "Shooter",
   ];
 
-
   // Handle search from URL query
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const searchQuery = params.get('search');
+    const searchQuery = params.get("search");
     if (searchQuery) {
       setSearchTerm(searchQuery);
     }
@@ -57,7 +56,7 @@ const Home = () => {
   const fetchGames = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/");
+      const { data } = await api.get("/games");
       setGames(data.data);
       setFilteredGames(data.data);
       setError("");
@@ -101,7 +100,7 @@ const Home = () => {
   }
 
   return (
-     <Container className="my-4">
+    <Container className="my-4">
       {/* Header */}
       <Row className="mb-4">
         <Col>
@@ -112,7 +111,7 @@ const Home = () => {
               <Button
                 variant="link"
                 size="sm"
-                onClick={() => setSearchTerm('')}
+                onClick={() => setSearchTerm("")}
               >
                 Clear
               </Button>
