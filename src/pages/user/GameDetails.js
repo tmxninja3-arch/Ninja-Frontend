@@ -32,7 +32,7 @@ const GameDetails = () => {
   const fetchGameDetails = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/${id}`);
+      const { data } = await api.get(`/games/${id}`);
       setGame(data.data);
       setError('');
     } catch (err) {
