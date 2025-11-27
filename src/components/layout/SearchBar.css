@@ -1,0 +1,339 @@
+/* ============================================
+   SEARCH CONTAINER
+   ============================================ */
+.navbar-search-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.navbar-search-form {
+  width: 100%;
+  margin: 0;
+}
+
+/* ============================================
+   SEARCH INPUT WRAPPER
+   ============================================ */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1.1rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.navbar-search-input {
+  width: 100%;
+  padding: 0.6rem 2.5rem 0.6rem 2.8rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.navbar-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-search-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Clear button */
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.search-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Loading spinner */
+.search-spinner {
+  position: absolute;
+  right: 12px;
+  color: white;
+}
+
+/* ============================================
+   SEARCH DROPDOWN
+   ============================================ */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-height: 500px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: dropdown-slide-in 0.3s ease;
+}
+
+@keyframes dropdown-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar */
+.search-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
+/* ============================================
+   SEARCH SECTIONS
+   ============================================ */
+.search-section {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-section:last-child {
+  border-bottom: none;
+}
+
+.search-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+
+.search-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #95a5a6;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 1rem;
+}
+
+.clear-recent-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.clear-recent-btn:hover {
+  opacity: 0.7;
+}
+
+/* ============================================
+   SUGGESTION ITEMS
+   ============================================ */
+.search-suggestion-item {
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.search-suggestion-item:hover,
+.search-suggestion-item.active {
+  background: linear-gradient(to right, #f8f9ff 0%, #fff 100%);
+}
+
+.suggestion-content {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  gap: 1rem;
+}
+
+.suggestion-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.suggestion-genre {
+  color: #7f8c8d;
+  background: #ecf0f1;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.suggestion-price {
+  color: #667eea;
+  font-weight: 700;
+}
+
+/* ============================================
+   RECENT SEARCHES
+   ============================================ */
+.search-recent-item {
+  cursor: pointer;
+  border: none;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  color: #2c3e50;
+}
+
+.search-recent-item:hover {
+  background: #f8f9fa;
+}
+
+.recent-icon {
+  font-size: 1rem;
+  opacity: 0.5;
+}
+
+/* ============================================
+   NO RESULTS
+   ============================================ */
+.search-no-results {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.no-results-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.no-results-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.no-results-hint {
+  font-size: 0.9rem;
+  color: #95a5a6;
+}
+
+/* ============================================
+   SEARCH TIPS
+   ============================================ */
+.search-tips {
+  padding: 2rem;
+  text-align: center;
+}
+
+.search-tip-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.search-tip-text {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 991px) {
+  .navbar-search-container {
+    max-width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .search-dropdown {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-search-input {
+    font-size: 0.9rem;
+    padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  }
+
+  .search-icon {
+    left: 10px;
+    font-size: 1rem;
+  }
+
+  .suggestion-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .suggestion-title {
+    font-size: 0.9rem;
+  }
+
+  .suggestion-meta {
+    font-size: 0.8rem;
+  }
+}
