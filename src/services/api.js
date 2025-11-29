@@ -1,5 +1,10 @@
 import axios from 'axios';
 
+
+console.log("ENV check:");
+console.log("process.env.REACT_APP_API_URL =", process.env.REACT_APP_API_URL);
+
+
 // Should be just /api, NOT /api/games
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
