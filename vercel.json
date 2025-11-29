@@ -5,6 +5,9 @@
       "destination": "/index.html"
     }
   ],
+  "env": {
+    "REACT_APP_API_URL": "https://ninja-backend.vercel.app/api"
+  },
   "headers": [
     {
       "source": "/(.*)",
