@@ -1,0 +1,30 @@
+/* Admin Layout Wrapper */
+.admin-layout-wrapper {
+  display: flex;
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+}
+
+.admin-main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 2rem;
+  transition: margin-left 0.3s ease;
+}
+
+/* When sidebar is collapsed */
+.cyber-sidebar.collapsed ~ .admin-main-content {
+  margin-left: 80px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .admin-main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .cyber-sidebar.collapsed ~ .admin-main-content {
+    margin-left: 0;
+  }
+}

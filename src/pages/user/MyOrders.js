@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Container, Card, Table, Badge, Button } from 'react-bootstrap';
+import { Container, Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../utils/hooks';
 import Loader from '../../components/common/Loader';
 import Message from '../../components/common/Message';
+import './MyOrders.css';
 
 const MyOrders = () => {
   const { user } = useAuth();
@@ -20,7 +21,8 @@ const MyOrders = () => {
       return;
     }
     fetchOrders();
-  }, [user, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const fetchOrders = async () => {
     try {
@@ -36,13 +38,21 @@ const MyOrders = () => {
   };
 
   const getStatusBadge = (status) => {
-    const variants = {
-      Pending: 'warning',
-      Paid: 'info',
-      Delivered: 'success',
-      Cancelled: 'danger',
+    const statusConfig = {
+      Pending: { variant: 'warning', icon: '⏳' },
+      Paid: { variant: 'info', icon: '💳' },
+      Delivered: { variant: 'success', icon: '✅' },
+      Cancelled: { variant: 'danger', icon: '❌' },
     };
-    return <Badge bg={variants[status] || 'secondary'}>{status}</Badge>;
+
+    const config = statusConfig[status] || { variant: 'secondary', icon: '📦' };
+    
+    return (
+      <Badge bg={config.variant} className={`order-badge badge-${status.toLowerCase()}`}>
+        <span className="badge-icon">{config.icon}</span>
+        {status}
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -52,74 +62,159 @@ const MyOrders = () => {
   if (error) {
     return (
       <Container className="mt-5">
-        <Message variant="danger">{error}</Message>
+        <div className="order-error">
+          <div className="error-icon">⚠️</div>
+          <h3>Oops! Something went wrong</h3>
+          <p>{error}</p>
+          <Button className="cyber-btn-primary" onClick={fetchOrders}>
+            <span className="btn-bg"></span>
+            <span className="btn-content">🔄 Retry</span>
+          </Button>
+        </div>
       </Container>
     );
   }
 
   return (
-    <Container className="my-5">
-      <h1 className="mb-4">📦 My Orders</h1>
+    <div className="orders-wrapper">
+      <div className="orders-border-animation"></div>
+      
+      <Container className="my-5">
+        <div className="orders-header">
+          <h1 className="orders-title">
+            <span className="orders-icon">📦</span>
+            <span className="title-text">My Orders</span>
+          </h1>
+          <div className="orders-subtitle">Track Your Gaming Collection</div>
+        </div>
 
-      {orders.length === 0 ? (
-        <Message variant="info">
-          You haven't placed any orders yet.{' '}
-          <Button variant="link" onClick={() => navigate('/')}>
-            Start Shopping
-          </Button>
-        </Message>
-      ) : (
-        <Card>
-          <Card.Body>
-            <Table responsive hover>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Date</th>
-                  <th>Games</th>
-                  <th>Total</th>
-                  <th>Payment</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr key={order._id}>
-                    <td>
-                      <small className="text-muted">
-                        {order._id.substring(0, 8)}...
-                      </small>
-                    </td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      {order.games.length} game
-                      {order.games.length > 1 ? 's' : ''}
-                    </td>
-                    <td>
-                      <strong>${order.total.toFixed(2)}</strong>
-                    </td>
-                    <td>
-                      <small>{order.paymentMethod}</small>
-                    </td>
-                    <td>{getStatusBadge(order.status)}</td>
-                    <td>
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => navigate(`/order/${order._id}`)}
-                      >
-                        View Details
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      )}
-    </Container>
+        {orders.length === 0 ? (
+          <div className="orders-empty">
+            <div className="empty-icon">🎮</div>
+            <h3>No Orders Yet</h3>
+            <p>You haven't placed any orders. Start building your gaming library!</p>
+            <Button 
+              className="cyber-btn-primary"
+              onClick={() => navigate('/')}
+            >
+              <span className="btn-bg"></span>
+              <span className="btn-content">Browse Games</span>
+            </Button>
+          </div>
+        ) : (
+          <Card className="orders-card">
+            <Card.Header className="orders-card-header">
+              <div className="header-content">
+                <span className="header-title">Order History</span>
+                <span className="header-count">{orders.length}</span>
+              </div>
+            </Card.Header>
+            
+            <Card.Body className="orders-card-body">
+              <div className="table-responsive">
+                <Table hover className="orders-table">
+                  <thead>
+                    <tr>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">🆔</span>
+                          Order ID
+                        </div>
+                      </th>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">📅</span>
+                          Date
+                        </div>
+                      </th>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">🎮</span>
+                          Games
+                        </div>
+                      </th>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">💰</span>
+                          Total
+                        </div>
+                      </th>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">💳</span>
+                          Payment
+                        </div>
+                      </th>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">📊</span>
+                          Status
+                        </div>
+                      </th>
+                      <th>
+                        <div className="th-content">
+                          <span className="th-icon">⚡</span>
+                          Actions
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((order) => (
+                      <tr key={order._id} className="order-row">
+                        <td>
+                          <div className="order-id">
+                            <span className="id-hash">#</span>
+                            {order._id.substring(0, 8)}...
+                          </div>
+                        </td>
+                        <td>
+                          <div className="order-date">
+                            {new Date(order.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="order-games">
+                            <span className="games-count">{order.games.length}</span>
+                            <span className="games-text">
+                              game{order.games.length > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="order-total">
+                            ${order.total.toFixed(2)}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="order-payment">
+                            {order.paymentMethod}
+                          </div>
+                        </td>
+                        <td>{getStatusBadge(order.status)}</td>
+                        <td>
+                          <Button
+                            className="order-view-btn"
+                            onClick={() => navigate(`/order/${order._id}`)}
+                          >
+                            <span className="btn-icon">👁️</span>
+                            <span className="btn-text">View</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </Card.Body>
+          </Card>
+        )}
+      </Container>
+    </div>
   );
 };
 

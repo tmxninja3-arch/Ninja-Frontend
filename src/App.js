@@ -6,7 +6,6 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
-
 // Pages
 import Home from './pages/user/Home';
 import Login from './pages/auth/Login';
@@ -19,11 +18,13 @@ import OrderDetails from './pages/user/OrderDetails';
 import About from './pages/About';
 
 // Admin Pages
-import Dashboard from './pages/admin/Dashboard';  // ← Add
-import ManageGames from './pages/admin/ManageGames';  // ← Add
-import ManageOrders from './pages/admin/ManageOrders';  // ← Add
+import Dashboard from './pages/admin/Dashboard';
+import ManageGames from './pages/admin/ManageGames';
+import ManageOrders from './pages/admin/ManageOrders';
+import UserManagement from './pages/admin/UserManagement';
 
 import './App.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/game/:id" element={<GameDetails />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/about" element={<About />} />
 
                 {/* Protected User Routes */}
                 <Route
@@ -99,9 +101,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-
-                <Route path="/about" element={<About />} />
-
+                
               </Routes>
             </main>
             <Footer />
@@ -109,12 +109,6 @@ function App() {
               position="top-right"
               autoClose={3000}
               hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
             />
           </div>
         </Router>

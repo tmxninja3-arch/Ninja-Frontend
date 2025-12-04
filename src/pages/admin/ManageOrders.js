@@ -1,30 +1,18 @@
-import { useState, useEffect } from 'react';
-import {
-  Container,
-  Table,
-  Button,
-  Modal,
-  Form,
-  Badge,
-  Card,
-} from 'react-bootstrap';
-import api from '../../services/api';
-import { toast } from 'react-toastify';
-import Loader from '../../components/common/Loader';
-import Message from '../../components/common/Message';
+import { useState, useEffect } from "react";
+import { Container, Table, Badge, Form, Row, Col } from "react-bootstrap";
+import { FaShoppingBag, FaSearch } from "react-icons/fa";
+import api from "../../services/api";
+import { toast } from "react-toastify";
+import Loader from "../../components/common/Loader";
+import Message from "../../components/common/Message";
+import AdminLayout from "../../components/layout/AdminLayout";
+import "./AdminPages.css";
 
 const ManageOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
-
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
-
-  const statusOptions = ['Pending', 'Paid', 'Delivered', 'Cancelled'];
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchOrders();
@@ -33,230 +21,157 @@ const ManageOrders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/orders/admin/all');
+      const { data } = await api.get("/orders/admin/all");
       setOrders(data.data);
-      setError('');
+      setError("");
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch orders');
+      setError(err.response?.data?.message || "Failed to fetch orders");
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredOrders = orders.filter((order) =>
-  filterStatus === 'All' ? true : order.status === filterStatus
-);
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order._id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleShowModal = (order) => {
-    setSelectedOrder(order);
-    setNewStatus(order.status);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedOrder(null);
-  };
-
-  const handleUpdateStatus = async () => {
+  const handleStatusChange = async (orderId, newStatus) => {
     try {
-      await api.put(`/orders/${selectedOrder._id}/status`, {
-        status: newStatus,
-      });
-      toast.success('Order status updated successfully!');
-      handleCloseModal();
-      fetchOrders();
+      await api.put(`/orders/${orderId}/status`, { status: newStatus });
+      setOrders(
+        orders.map((order) =>
+          order._id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+      toast.success("Order status updated!");
     } catch (error) {
-      const message =
-        error.response?.data?.message || 'Failed to update status';
-      toast.error(message);
+      toast.error("Failed to update status");
     }
   };
 
   const getStatusBadge = (status) => {
     const variants = {
-      Pending: 'warning',
-      Paid: 'info',
-      Delivered: 'success',
-      Cancelled: 'danger',
+      Pending: "warning",
+      Paid: "info",
+      Delivered: "success",
+      Cancelled: "danger",
     };
-    return <Badge bg={variants[status] || 'secondary'}>{status}</Badge>;
+    return <Badge bg={variants[status]}>{status}</Badge>;
   };
 
   if (loading) {
-    return <Loader />;
+    return (
+      <AdminLayout>
+        <Loader />
+      </AdminLayout>
+    );
   }
 
   if (error) {
     return (
-      <Container className="mt-5">
-        <Message variant="danger">{error}</Message>
-      </Container>
+      <AdminLayout>
+        <Container className="mt-5">
+          <Message variant="danger">{error}</Message>
+        </Container>
+      </AdminLayout>
     );
   }
 
   return (
-    <Container className="my-5">
-      <h1 className="mb-4">📦 Manage Orders</h1>
+    <AdminLayout>
+      <Container fluid className="py-4">
+        {/* Page Header */}
+        <Row className="mb-4">
+          <Col>
+            <div className="admin-page-header">
+              <div className="header-left">
+                <h2 className="admin-page-title">
+                  <FaShoppingBag className="me-2" />
+                  Manage Orders
+                </h2>
+                <p className="text-muted mb-0">
+                  Total Orders: <strong className="text-primary">{orders.length}</strong>
+                </p>
+              </div>
+            </div>
+          </Col>
+        </Row>
 
-      {/* Summary Cards */}
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <Card className="text-center">
-            <Card.Body>
-              <h4>{orders.length}</h4>
-              <small className="text-muted">Total Orders</small>
-            </Card.Body>
-          </Card>
-        </div>
-        <div className="col-md-3">
-          <Card className="text-center">
-            <Card.Body>
-              <h4>
-                {orders.filter((o) => o.status === 'Pending').length}
-              </h4>
-              <small className="text-muted">Pending</small>
-            </Card.Body>
-          </Card>
-        </div>
-        <div className="col-md-3">
-          <Card className="text-center">
-            <Card.Body>
-              <h4>
-                {orders.filter((o) => o.status === 'Delivered').length}
-              </h4>
-              <small className="text-muted">Delivered</small>
-            </Card.Body>
-          </Card>
-        </div>
-        <div className="col-md-3">
-          <Card className="text-center">
-            <Card.Body>
-              <h4>
-                $
-                {orders
-                  .reduce((sum, order) => sum + order.total, 0)
-                  .toFixed(2)}
-              </h4>
-              <small className="text-muted">Total Revenue</small>
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
+        {/* Search Bar */}
+        <Row className="mb-4">
+          <Col md={6}>
+            <div className="cyber-search-box">
+             
+              <Form.Control
+                type="text"
+                placeholder="🔎 Search by user or order ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="cyber-search-input"
+              />
+            </div>
+          </Col>
+        </Row>
 
-      {/* Add this before the table */}
-<div className="mb-3">
-  <Form.Select
-    value={filterStatus}
-    onChange={(e) => setFilterStatus(e.target.value)}
-    style={{ width: '200px' }}
-  >
-    <option value="All">All Orders</option>
-    <option value="Pending">Pending</option>
-    <option value="Paid">Paid</option>
-    <option value="Delivered">Delivered</option>
-    <option value="Cancelled">Cancelled</option>
-  </Form.Select>
-</div>
-
-      {orders.length === 0 ? (
-        <Message variant="info">No orders found.</Message>
-      ) : (
-        <Table responsive striped bordered hover>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Date</th>
-              <th>Games</th>
-              <th>Total</th>
-              <th>Payment</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.map((order) => (
-              <tr key={order._id}>
-                <td>
-                  <small>{order._id.substring(0, 8)}...</small>
-                </td>
-                <td>
-                  {order.user?.name || 'Unknown'}
-                  <br />
-                  <small className="text-muted">
-                    {order.user?.email || 'N/A'}
-                  </small>
-                </td>
-                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                <td>{order.games.length}</td>
-                <td>
-                  <strong>${order.total.toFixed(2)}</strong>
-                </td>
-                <td>
-                  <small>{order.paymentMethod}</small>
-                </td>
-                <td>{getStatusBadge(order.status)}</td>
-                <td>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleShowModal(order)}
-                  >
-                    Update Status
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-
-      {/* Update Status Modal */}
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Update Order Status</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedOrder && (
-            <>
-              <p>
-                <strong>Order ID:</strong> {selectedOrder._id}
-              </p>
-              <p>
-                <strong>Customer:</strong> {selectedOrder.user?.name}
-              </p>
-              <p>
-                <strong>Current Status:</strong>{' '}
-                {getStatusBadge(selectedOrder.status)}
-              </p>
-              <hr />
-              <Form.Group>
-                <Form.Label>New Status</Form.Label>
-                <Form.Select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                >
-                  {statusOptions.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleUpdateStatus}>
-            Update Status
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+        {/* Orders Table */}
+        <div className="cyber-card">
+          <div className="cyber-card-header">
+            <h5 className="mb-0">All Orders ({filteredOrders.length})</h5>
+          </div>
+          <div className="table-responsive">
+            <Table hover className="cyber-table mb-0">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>User</th>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody >
+                {filteredOrders.map((order) => (
+                  <tr key={order._id}>
+                    <td className="font-monospace text-dark">
+                      {order._id.substring(0, 8)}...
+                    </td>
+                    <td  className= "text-dark">{order.user?.name || "N/A"}</td>
+                    <td  className= "text-dark">{new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <Badge bg="secondary">{order.games.length}</Badge>
+                    </td>
+                    <td className="text-success fw-bold">${order.total}</td>
+                    <td  className= "text-dark">{order.paymentMethod}</td>
+                    <td>{getStatusBadge(order.status)}</td>
+                    <td>
+                      <Form.Select
+                        size="sm"
+                        value={order.status}
+                        onChange={(e) =>
+                          handleStatusChange(order._id, e.target.value)
+                        }
+                        className="status-select"
+                        style={{ minWidth: "130px" }}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </Form.Select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </div>
+      </Container>
+    </AdminLayout>
   );
 };
 

@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 
@@ -76,6 +76,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Check if user is admin - ADDED THIS
+  const isAdmin = () => {
+    return user && user.role === 'admin';
+  };
+
   const value = {
     user,
     loading,
@@ -83,7 +88,19 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
+    isAdmin, // ← ADDED THIS
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Custom hook to use auth context - ADDED THIS ENTIRE SECTION
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  return context;
 };

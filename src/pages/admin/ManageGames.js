@@ -7,12 +7,17 @@ import {
   Form,
   Badge,
   Image,
+  Row,
+  Col,
 } from "react-bootstrap";
+import { FaPlus, FaEdit, FaTrash, FaGamepad, FaSearch } from "react-icons/fa";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import Loader from "../../components/common/Loader";
 import Message from "../../components/common/Message";
 import CloudinaryUpload from "../../components/common/CloudinaryUpload";
+import AdminLayout from "../../components/layout/AdminLayout";
+import "./AdminPages.css";
 
 const ManageGames = () => {
   const [games, setGames] = useState([]);
@@ -84,6 +89,7 @@ const ManageGames = () => {
         price: game.price,
         genre: game.genre,
         image: game.image,
+        imagePublicId: game.imagePublicId || "",
         downloadURL: game.downloadURL || "",
         stock: game.stock,
         platform: game.platform || ["PC"],
@@ -97,6 +103,7 @@ const ManageGames = () => {
         price: "",
         genre: "Action",
         image: "",
+        imagePublicId: "",
         downloadURL: "",
         stock: "",
         platform: ["PC"],
@@ -132,11 +139,9 @@ const ManageGames = () => {
 
     try {
       if (editingGame) {
-        // Update existing game
         await api.put(`/games/${editingGame._id}`, formData);
         toast.success("Game updated successfully!");
       } else {
-        // Create new game
         await api.post("/games", formData);
         toast.success("Game created successfully!");
       }
@@ -164,283 +169,390 @@ const ManageGames = () => {
   };
 
   if (loading) {
-    return <Loader />;
+    return (
+      <AdminLayout>
+        <Loader />
+      </AdminLayout>
+    );
   }
 
   if (error) {
     return (
-      <Container className="mt-5">
-        <Message variant="danger">{error}</Message>
-      </Container>
+      <AdminLayout>
+        <Container className="mt-5">
+          <Message variant="danger">{error}</Message>
+        </Container>
+      </AdminLayout>
     );
   }
 
   return (
-    <Container className="my-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>🎮 Manage Games</h1>
-        <Button variant="primary" onClick={() => handleShowModal()}>
-          + Add New Game
-        </Button>
-      </div>
-
-      <div className="mb-3">
-        <Form.Control
-          type="text"
-          placeholder="Search games by title..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      {games.length === 0 ? (
-        <Message variant="info">
-          No games found. Click "Add New Game" to create one.
-        </Message>
-      ) : (
-        <Table responsive striped bordered hover>
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Title</th>
-              <th>Genre</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Rating</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredGames.map((game) => (
-              <tr key={game._id}>
-                <td>
-                  <Image
-                    src={game.image}
-                    alt={game.title}
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      objectFit: "cover",
-                    }}
-                    rounded
-                  />
-                </td>
-                <td>{game.title}</td>
-                <td>
-                  <Badge bg="secondary">{game.genre}</Badge>
-                </td>
-                <td>${game.price.toFixed(2)}</td>
-                <td>
-                  {game.stock > 0 ? (
-                    <Badge bg="success">{game.stock}</Badge>
-                  ) : (
-                    <Badge bg="danger">Out of Stock</Badge>
-                  )}
-                </td>
-                <td>⭐ {game.rating || "N/A"}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleShowModal(game)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(game._id, game.title)}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-
-      {/* Image Upload Section */}
-      <Form.Group className="mb-3">
-        <Form.Label>Game Image</Form.Label>
-
-        {/* Cloudinary Upload Component */}
-        <CloudinaryUpload
-          currentImage={formData.image}
-          onUploadSuccess={(cloudinaryUrl, publicId) => {
-            setFormData({
-              ...formData,
-              image: cloudinaryUrl,
-              imagePublicId: publicId, // Store for deletion later
-            });
-          }}
-          uploadType="game"
-          buttonText="Upload to Cloud"
-        />
-
-        {/* Manual URL Input (Backup Option) */}
-        <div className="mt-3">
-          <Form.Label>Or paste image URL:</Form.Label>
-          <Form.Control
-            type="text"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-            placeholder="https://example.com/image.jpg"
-          />
-          {formData.image && (
-            <small className="text-success d-block mt-1">
-              ✓ Image URL set: {formData.image.substring(0, 50)}...
-            </small>
-          )}
-        </div>
-      </Form.Group>
-
-      {/* Add/Edit Game Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editingGame ? "Edit Game" : "Add New Game"}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Title *</Form.Label>
-              <Form.Control
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Price *</Form.Label>
-              <Form.Control
-                type="number"
-                step="0.01"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Genre *</Form.Label>
-              <Form.Select
-                name="genre"
-                value={formData.genre}
-                onChange={handleChange}
-                required
+    <AdminLayout>
+      <Container fluid className="py-4">
+        {/* Page Header */}
+        <Row className="mb-4">
+          <Col>
+            <div className="admin-page-header">
+              <div className="header-left">
+                <h2 className="admin-page-title">
+                  <FaGamepad className="me-2" />
+                  Manage Games
+                </h2>
+                <p className="text-muted mb-0">
+                  Total Games: <strong className="text-primary">{games.length}</strong>
+                </p>
+              </div>
+              <Button 
+                variant="primary" 
+                className="cyber-btn-primary"
+                onClick={() => handleShowModal()}
               >
-                {genres.map((genre) => (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+                <FaPlus className="me-2" />
+                Add New Game
+              </Button>
+            </div>
+          </Col>
+        </Row>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Image URL *</Form.Label>
+        {/* Search Bar */}
+        <Row className="mb-4">
+          <Col md={6}>
+            <div className="cyber-search-box">
+              
               <Form.Control
                 type="text"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                required
+                placeholder="🔎 Search games by title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="cyber-search-input"
               />
-              {formData.image && (
-                <Image
-                  src={formData.image}
-                  alt="Preview"
-                  style={{ width: "200px", marginTop: "10px" }}
-                  rounded
-                />
+            </div>
+          </Col>
+        </Row>
+
+        {/* Games Table */}
+        {games.length === 0 ? (
+          <div className="empty-state-admin">
+            <FaGamepad className="empty-icon" />
+            <h4>No games found</h4>
+            <p>Click "Add New Game" to create your first game</p>
+            <Button variant="primary" onClick={() => handleShowModal()}>
+              <FaPlus className="me-2" />
+              Add New Game
+            </Button>
+          </div>
+        ) : (
+          <div className="cyber-card">
+            <div className="cyber-card-header">
+              <h5 className="mb-0">
+                All Games ({filteredGames.length})
+              </h5>
+            </div>
+            <div className="table-responsive">
+              <Table hover className="cyber-table mb-0">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Genre</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Rating</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredGames.map((game) => (
+                    <tr key={game._id}>
+                      <td>
+                        <Image
+                          src={game.image}
+                          alt={game.title}
+                          className="table-game-image"
+                          rounded
+                        />
+                      </td>
+                      <td className="fw-bold text-dark">{game.title}</td>
+                      <td>
+                        <Badge bg="primary" className="genre-badge">
+                          {game.genre}
+                        </Badge>
+                      </td>
+                      <td className="text-success fw-bold">
+                        ${game.price.toFixed(2)}
+                      </td>
+                      <td>
+                        {game.stock > 0 ? (
+                          <Badge bg="success">{game.stock}</Badge>
+                        ) : (
+                          <Badge bg="danger">Out of Stock</Badge>
+                        )}
+                      </td>
+                      <td>
+                        <span className="rating-badge">
+                          ⭐ {game.rating || "N/A"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <Button
+                            variant="outline-warning"
+                            size="sm"
+                            onClick={() => handleShowModal(game)}
+                            className="action-btn"
+                          >
+                            <FaEdit />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDelete(game._id, game.title)}
+                            className="action-btn"
+                          >
+                            <FaTrash />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        {/* Add/Edit Game Modal */}
+        <Modal 
+          show={showModal} 
+          onHide={handleCloseModal} 
+          size="lg"
+          centered
+          className="cyber-modal"
+        >
+          <Modal.Header closeButton className="cyber-modal-header">
+            <Modal.Title>
+              {editingGame ? (
+                <>
+                  <FaEdit className="me-2" />
+                  Edit Game
+                </>
+              ) : (
+                <>
+                  <FaPlus className="me-2" />
+                  Add New Game
+                </>
               )}
-            </Form.Group>
+            </Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleSubmit}>
+            <Modal.Body className="cyber-modal-body">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="cyber-label">
+                      Title <span className="text-danger">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      required
+                      className="cyber-input"
+                      placeholder="Enter game title"
+                    />
+                  </Form.Group>
+                </Col>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Download URL (Optional)</Form.Label>
-              <Form.Control
-                type="text"
-                name="downloadURL"
-                value={formData.downloadURL}
-                onChange={handleChange}
-                placeholder="https://example.com/download"
-              />
-            </Form.Group>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="cyber-label">
+                      Price <span className="text-danger">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      required
+                      className="cyber-input"
+                      placeholder="0.00"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Stock *</Form.Label>
-              <Form.Control
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label className="cyber-label">
+                  Description <span className="text-danger">*</span>
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  className="cyber-input"
+                  placeholder="Enter game description"
+                />
+              </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>
-                Platform (Hold Ctrl/Cmd to select multiple)
-              </Form.Label>
-              <Form.Select
-                multiple
-                name="platform"
-                value={formData.platform}
-                onChange={handlePlatformChange}
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="cyber-label">
+                      Genre <span className="text-danger">*</span>
+                    </Form.Label>
+                    <Form.Select
+                      name="genre"
+                      value={formData.genre}
+                      onChange={handleChange}
+                      required
+                      className="cyber-input"
+                    >
+                      {genres.map((genre) => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="cyber-label">
+                      Stock <span className="text-danger">*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="stock"
+                      value={formData.stock}
+                      onChange={handleChange}
+                      required
+                      className="cyber-input"
+                      placeholder="0"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              {/* Image Upload Section */}
+              <Form.Group className="mb-3">
+                <Form.Label className="cyber-label">Game Image</Form.Label>
+
+                <CloudinaryUpload
+                  currentImage={formData.image}
+                  onUploadSuccess={(cloudinaryUrl, publicId) => {
+                    setFormData({
+                      ...formData,
+                      image: cloudinaryUrl,
+                      imagePublicId: publicId,
+                    });
+                  }}
+                  uploadType="game"
+                  buttonText="Upload to Cloud"
+                />
+
+                <div className="mt-3">
+                  <Form.Label className="cyber-label">Or paste image URL:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleChange}
+                    placeholder="https://example.com/image.jpg"
+                    className="cyber-input"
+                  />
+                  {formData.image && (
+                    <div className="mt-2">
+                      <Image
+                        src={formData.image}
+                        alt="Preview"
+                        style={{ width: "200px", maxHeight: "200px", objectFit: "cover" }}
+                        rounded
+                        className="image-preview"
+                      />
+                    </div>
+                  )}
+                </div>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label className="cyber-label">Download URL (Optional)</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="downloadURL"
+                  value={formData.downloadURL}
+                  onChange={handleChange}
+                  placeholder="https://example.com/download"
+                  className="cyber-input"
+                />
+              </Form.Group>
+
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="cyber-label">
+                      Platform (Hold Ctrl/Cmd for multiple)
+                    </Form.Label>
+                    <Form.Select
+                      multiple
+                      name="platform"
+                      value={formData.platform}
+                      onChange={handlePlatformChange}
+                      className="cyber-input"
+                      style={{ height: "120px" }}
+                    >
+                      {platforms.map((platform) => (
+                        <option key={platform} value={platform}>
+                          {platform}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="cyber-label">Rating (0-5)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      name="rating"
+                      value={formData.rating}
+                      onChange={handleChange}
+                      className="cyber-input"
+                      placeholder="0.0"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Modal.Body>
+            <Modal.Footer className="cyber-modal-footer">
+              <Button 
+                variant="secondary" 
+                onClick={handleCloseModal}
+                className="cyber-btn-secondary"
               >
-                {platforms.map((platform) => (
-                  <option key={platform} value={platform}>
-                    {platform}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Rating (0-5)</Form.Label>
-              <Form.Control
-                type="number"
-                step="0.1"
-                min="0"
-                max="5"
-                name="rating"
-                value={formData.rating}
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              {editingGame ? "Update Game" : "Create Game"}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-    </Container>
+                Cancel
+              </Button>
+              <Button 
+                variant="primary" 
+                type="submit"
+                className="cyber-btn-primary"
+              >
+                {editingGame ? "Update Game" : "Create Game"}
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
+      </Container>
+    </AdminLayout>
   );
 };
 
