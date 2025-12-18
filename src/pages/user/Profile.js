@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
-import { useAuth } from '../../utils/hooks';
+import { useState } from "react";
+import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import { useAuth } from "../../utils/hooks";
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    password: '',
-    confirmPassword: '',
+    name: user?.name || "",
+    email: user?.email || "",
+    password: "",
+    confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,7 @@ const Profile = () => {
     e.preventDefault();
 
     if (password && password !== confirmPassword) {
-      alert('Passwords do not match');
+      alert("Passwords do not match");
       return;
     }
 
@@ -36,7 +36,7 @@ const Profile = () => {
         updateData.password = password;
       }
       await updateProfile(updateData);
-      setFormData({ ...formData, password: '', confirmPassword: '' });
+      setFormData({ ...formData, password: "", confirmPassword: "" });
     } catch (error) {
       // Error handled by AuthContext
     } finally {
@@ -107,7 +107,7 @@ const Profile = () => {
                   className="w-100"
                   disabled={loading}
                 >
-                  {loading ? 'Updating...' : 'Update Profile'}
+                  {loading ? "Updating..." : "Update Profile"}
                 </Button>
               </Form>
 
@@ -118,8 +118,6 @@ const Profile = () => {
                   <strong>Account Details:</strong>
                   <br />
                   Role: {user?.role}
-                  <br />
-                  Joined: {new Date(user?.createdAt).toLocaleDateString()}
                 </small>
               </div>
             </Card.Body>

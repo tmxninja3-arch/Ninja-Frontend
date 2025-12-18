@@ -310,7 +310,10 @@
   border-radius: 25px;
   overflow: hidden;
   font-weight: 700;
-  display: inline-block;
+  display: inline-flex;          /* so we can center text */
+  justify-content: center;
+  align-items: center;
+  min-width: 150px;              /* increase this value as needed */
   border: 2px solid transparent;
   background: linear-gradient(#0a0e27, #0a0e27) padding-box,
               linear-gradient(135deg, #00f0ff, #ff00ff) border-box;

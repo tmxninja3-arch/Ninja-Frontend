@@ -35,7 +35,7 @@ const Login = () => {
   };
 
   return (
-    <Container>
+    <Container >
       <Row className="justify-content-center mt-5">
         <Col md={6} lg={5}>
           <Card className="shadow">
@@ -91,7 +91,7 @@ const Login = () => {
                 <small className="text-muted">
                   <strong>Demo Credentials:</strong>
                   <br />
-                  User: john@example.com / 123456
+                  User: test@gmail.com/ 123456
                   <br />
                   Admin: admin@gamestore.com / admin123
                 </small>

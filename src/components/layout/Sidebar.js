@@ -17,20 +17,28 @@ const Sidebar = () => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const [isCollapsed, setIsCollapsed] = useState(false); // desktop collapse
-  const [isMobileOpen, setIsMobileOpen] = useState(false); // mobile open/close
+  // ✅ CLOSED BY DEFAULT
+  const [isOpen, setIsOpen] = useState(false); // Sidebar closed by default
+  const [isCollapsed, setIsCollapsed] = useState(true); // Desktop collapsed state
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  // Toggle sidebar open/close
   const toggleSidebar = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  // Toggle collapsed/expanded (desktop only)
+  const toggleCollapse = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  const toggleMobileSidebar = () => {
-    setIsMobileOpen((prev) => !prev);
+  // Close sidebar (mobile)
+  const closeSidebar = () => {
+    setIsOpen(false);
   };
 
   // Admin Menu Items
@@ -75,27 +83,22 @@ const Sidebar = () => {
 
   return (
     <>
-      
-      {/* Mobile Toggle Button (show only when sidebar is closed) */}
-      {!isMobileOpen && (
-        <button
-          className="mobile-sidebar-toggle"
-          onClick={toggleMobileSidebar}
-          aria-label="Open sidebar"
-        >
-          <FaBars />
-        </button>
-      )}
+      {/* Toggle Button - Always Visible */}
+      <button
+        className="sidebar-toggle-button"
+        onClick={toggleSidebar}
+        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+      >
+        {isOpen ? <FaTimes /> : <FaBars />}
+      </button>
 
       {/* Sidebar Overlay (Mobile) */}
-      {isMobileOpen && (
-        <div className="sidebar-overlay" onClick={toggleMobileSidebar} />
-      )}
+      {isOpen && <div className="sidebar-overlay" onClick={closeSidebar} />}
 
       {/* Sidebar */}
       <aside
-        className={`cyber-sidebar ${isCollapsed ? "collapsed" : ""} ${
-          isMobileOpen ? "mobile-open" : ""
+        className={`cyber-sidebar ${isOpen ? "open" : ""} ${
+          isCollapsed ? "collapsed" : ""
         }`}
       >
         {/* Sidebar Header */}
@@ -109,10 +112,10 @@ const Sidebar = () => {
             )}
           </div>
 
-          {/* Desktop Toggle */}
+          {/* Desktop Collapse Toggle */}
           <button
-            className="sidebar-toggle desktop-only"
-            onClick={toggleSidebar}
+            className="sidebar-collapse-toggle desktop-only"
+            onClick={toggleCollapse}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? <FaBars /> : <FaTimes />}
@@ -120,15 +123,15 @@ const Sidebar = () => {
 
           {/* Mobile Close */}
           <button
-            className="sidebar-toggle mobile-only"
-            onClick={toggleMobileSidebar}
+            className="sidebar-close-toggle mobile-only"
+            onClick={closeSidebar}
             aria-label="Close sidebar"
           >
             <FaTimes />
           </button>
         </div>
 
-        {/* User Info (hidden in collapsed desktop) */}
+        {/* User Info */}
         {!isCollapsed && user && (
           <div className="sidebar-user-info">
             <div className="user-avatar">
@@ -154,7 +157,7 @@ const Sidebar = () => {
                   className={({ isActive }) =>
                     `nav-link ${isActive ? "active" : ""}`
                   }
-                  onClick={() => setIsMobileOpen(false)} // close on mobile after click
+                  onClick={closeSidebar}
                 >
                   <span className="nav-icon">{item.icon}</span>
                   {!isCollapsed && (
